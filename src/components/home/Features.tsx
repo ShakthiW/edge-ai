@@ -1,5 +1,7 @@
+"use client"
+
 import { cn } from "@/utils/cn";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BentoGrid, BentoGridItem } from "../ui/bento-grid";
 import {
   IconArrowWaveRightUp,
@@ -10,8 +12,32 @@ import {
   IconSignature,
   IconTableColumn,
 } from "@tabler/icons-react";
+import Image from "next/image";
+import { storage } from "@/app/firebaseConfig";
+import { ref, getDownloadURL, listAll } from "firebase/storage";
 
 export function Features() {
+  const [imageURLs, setImageURLs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchImageURLs = async () => {
+      try {
+        const folderRef = ref(storage, "Features"); // Assuming your images are stored in a "skeletons" folder
+        const imageFiles = await listAll(folderRef);
+        const urlsPromises = imageFiles.items.map(async (fileRef) => {
+          const url = await getDownloadURL(fileRef);
+          return url;
+        });
+        const urls = await Promise.all(urlsPromises);
+        setImageURLs(urls);
+      } catch (error) {
+        console.error("Error fetching image URLs:", error);
+      }
+    };
+
+    fetchImageURLs();
+  }, []);
+
   return (
     <BentoGrid className="max-w-4xl mx-auto">
       {items.map((item, i) => (
@@ -19,7 +45,7 @@ export function Features() {
           key={i}
           title={item.title}
           description={item.description}
-          header={item.header}
+          header={<Skeleton index={i + 1} imageURLs={imageURLs} />}
           icon={item.icon}
           className={i === 3 || i === 6 ? "md:col-span-2" : ""}
         />
@@ -27,51 +53,64 @@ export function Features() {
     </BentoGrid>
   );
 }
-const Skeleton = () => (
-  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100"></div>
+
+const Skeleton = ({
+  index,
+  imageURLs,
+}: {
+  index: number;
+  imageURLs: string[];
+}) => (
+  <Image
+    src={imageURLs[index - 1]} 
+    width={100}
+    height={100}
+    className={cn("mx-auto")}
+    alt={`skeleton-${index}`}
+  />
 );
+
 const items = [
   {
-    title: "The Dawn of Innovation",
-    description: "Explore the birth of groundbreaking ideas and inventions.",
-    header: <Skeleton />,
+    title: "Edge AI Technology",
+    description:
+      "Harness the power of Edge AI for real-time violence detection.",
     icon: <IconClipboardCopy className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Digital Revolution",
-    description: "Dive into the transformative power of technology.",
-    header: <Skeleton />,
+    title: "On-the-Go Protection",
+    description:
+      "Carry your safety net with Secureye's portable Edge AI device.",
     icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Art of Design",
-    description: "Discover the beauty of thoughtful and functional design.",
-    header: <Skeleton />,
+    title: "Instant Threat Recognition",
+    description:
+      "Identify potential threats instantly with Secureye's Edge AI capabilities.",
     icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Power of Communication",
+    title: "Compact and Powerful",
     description:
-      "Understand the impact of effective communication in our lives.",
-    header: <Skeleton />,
+      "Experience high-performance violence detection in a compact Edge AI device.",
     icon: <IconTableColumn className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Pursuit of Knowledge",
-    description: "Join the quest for understanding and enlightenment.",
-    header: <Skeleton />,
+    title: "Smart Security Anywhere",
+    description:
+      "Bring intelligent security to any location with Secureye's Edge AI device.",
     icon: <IconArrowWaveRightUp className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Joy of Creation",
-    description: "Experience the thrill of bringing ideas to life.",
-    header: <Skeleton />,
+    title: "Responsive Alert System",
+    description:
+      "Get notified immediately of detected violence, thanks to Secureye's Edge AI.",
     icon: <IconBoxAlignTopLeft className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "The Spirit of Adventure",
-    description: "Embark on exciting journeys and thrilling discoveries.",
-    header: <Skeleton />,
+    title: "Efficient Monitoring",
+    description:
+      "Monitor your environment efficiently with Secureye's Edge AI device.",
     icon: <IconBoxAlignRightFilled className="h-4 w-4 text-neutral-500" />,
   },
 ];

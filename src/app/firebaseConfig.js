@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getStorage } from "firebase/storage";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -14,11 +16,13 @@ const firebaseConfig = {
   storageBucket: "edge-ai-33acf.appspot.com",
   messagingSenderId: "396243547573",
   appId: "1:396243547573:web:b2e1fae0914485358795fc",
-  measurementId: "G-F297V3100W"
+  measurementId: "G-F297V3100W",
+  storageBucket: "gs://edge-ai-33acf.appspot.com"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const storage = getStorage(app);
+const database = getDatabase(app)
 
-export { database } 
+export { storage, database };

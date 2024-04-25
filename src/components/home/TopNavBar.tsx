@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HoveredLink, Menu, MenuItem, ProductItem } from "../ui/navbar-menu";
 import { cn } from "@/utils/cn";
+import { storage } from "@/app/firebaseConfig";
+import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 
 export function TopNavBar() {
   return (
@@ -13,6 +15,47 @@ export function TopNavBar() {
 
 function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
+  const [videoURLs, setVideoURLs] = useState<string[]>([]);
+  const [historyVideoURLs, setHistoryVideoURLs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const folderRef = ref(storage, "live");
+        const files = await listAll(folderRef);
+        const urlsPromises = files.items.map(async (fileRef) => {
+          const url = await getDownloadURL(fileRef);
+          return url;
+        });
+        const urls = await Promise.all(urlsPromises);
+        setVideoURLs(urls);
+      } catch (error) {
+        console.error("Error fetching live videos:", error);
+      }
+    };
+
+    fetchVideos();
+  }, []);
+
+  useEffect(() => {
+    const fetchHistoryVideos = async () => {
+      try {
+        const folderRef = ref(storage, "history");
+        const files = await listAll(folderRef);
+        const urlsPromises = files.items.map(async (fileRef) => {
+          const url = await getDownloadURL(fileRef);
+          return url;
+        });
+        const urls = await Promise.all(urlsPromises);
+        setHistoryVideoURLs(urls);
+      } catch (error) {
+        console.error("Error fetching history videos:", error);
+      }
+    };
+
+    fetchHistoryVideos();
+  }, []);
+
   return (
     <div
       className={cn("fixed top-10 inset-x-0 max-w-2xl mx-auto z-50", className)}
@@ -26,60 +69,32 @@ function Navbar({ className }: { className?: string }) {
             <HoveredLink href="#wishlist">Join Wishlist</HoveredLink>
           </div>
         </MenuItem>
+
         <MenuItem setActive={setActive} active={active} item="History">
-          <div className="  text-sm grid grid-cols-2 gap-10 p-4">
-            <ProductItem
-              title="13 April, 2024"
-              href="/history"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="14 Feb, 2024"
-              href="/history"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="16 Oct, 2024"
-              href="/history"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="21 Nov, 2024"
-              href="/history"
-              src="/"
-              description="Click to view"
-            />
+          <div className="text-sm grid grid-cols-2 gap-10 p-4">
+            {historyVideoURLs.map((url, index) => (
+              <ProductItem
+                key={index}
+                title={new Date().toLocaleDateString()} // Use the date as the title
+                href="/history"
+                src={url} // Use the video URL as src
+                description="Click to view"
+              />
+            ))}
           </div>
         </MenuItem>
+
         <MenuItem setActive={setActive} active={active} item="Real-Time">
           <div className="  text-sm grid grid-cols-2 gap-10 p-4">
-            <ProductItem
-              title="CCTV 01"
-              href="/live-cctv"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="CCTV 02"
-              href="/live-cctv"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="CCTV 03"
-              href="/live-cctv"
-              src="/"
-              description="Click to view"
-            />
-            <ProductItem
-              title="CCTV 04"
-              href="/live-cctv"
-              src="/"
-              description="Click to view"
-            />
+            {videoURLs.map((url, index) => (
+              <ProductItem
+                key={index}
+                title={`CCTV ${index + 1}`}
+                href="/live-cctv"
+                src={url} 
+                description="Click to view"
+              />
+            ))}
           </div>
         </MenuItem>
 
@@ -102,3 +117,7 @@ function Navbar({ className }: { className?: string }) {
     </div>
   );
 }
+function setVideoURLs(urls: string[]) {
+  throw new Error("Function not implemented.");
+}
+

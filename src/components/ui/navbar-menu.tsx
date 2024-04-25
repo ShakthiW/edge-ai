@@ -90,11 +90,11 @@ export const ProductItem = ({
 }) => {
   return (
     <Link href={href} className="flex space-x-2">
-      <Image
+      <video
         src={src}
         width={140}
         height={70}
-        alt={title}
+        //alt={title}
         className="flex-shrink-0 rounded-md shadow-2xl"
       />
       <div>
