@@ -17,7 +17,7 @@ const HistoryPage: React.FC = () => {
 
         const videoPromises = files.items.map(async (fileRef, index) => {
           const videoUrl = await getDownloadURL(fileRef);
-          const posterUrl = `/images/img${index + 1}.jpeg`; // Assuming you have posters for each video
+          const posterUrl = `/images/img${index + 1}.jpeg`; 
           return { id: index + 1, poster: posterUrl, videoUri: videoUrl };
         });
 

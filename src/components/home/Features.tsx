@@ -65,7 +65,7 @@ const Skeleton = ({
     src={imageURLs[index - 1]} 
     width={100}
     height={100}
-    className={cn("mx-auto")}
+    className={cn("mx-auto object-cover w-full overflow-hidden")}
     alt={`skeleton-${index}`}
   />
 );
